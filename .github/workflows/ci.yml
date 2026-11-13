@@ -1,14 +1,14 @@
 name: CI
-# Design B: no `labeled` here, so labels never start a CI run.
-# The PR title decides the result, standing in for a Dependabot-started run
-# whose reviews fail: a title containing FAIL fails `gate / check`.
+# Design A (what production runs today): CI also runs on `labeled`; any
+# label other than run-ai-reviews skips `gate` at the caller level.
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, labeled]
 permissions:
   contents: read
 jobs:
   gate:
+    if: github.event.action != 'labeled' || github.event.label.name == 'run-ai-reviews'
     uses: ./.github/workflows/inner.yml
     with:
       pass: ${{ !contains(github.event.pull_request.title, 'FAIL') }}
