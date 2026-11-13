@@ -1,8 +1,7 @@
 name: CI review re-run
-# Design B: the run-ai-reviews re-run lives in its own workflow. The same
-# caller job id `gate` reports the same context `gate / check` (and passes,
-# like a review that really ran). Any other label skips `gate` at the caller
-# level, which reports a check named just `gate`.
+# Design D2: run on ANY label event while the PR carries run-ai-reviews, so
+# a later unrelated label re-reports `gate / check` instead of leaving a
+# skipped run as the latest one of this workflow.
 on:
   pull_request:
     types: [labeled]
@@ -10,7 +9,7 @@ permissions:
   contents: read
 jobs:
   gate:
-    if: github.event.label.name == 'run-ai-reviews'
+    if: contains(github.event.pull_request.labels.*.name, 'run-ai-reviews')
     uses: ./.github/workflows/inner.yml
     with:
       pass: true
