@@ -1,7 +1,8 @@
 name: CI
-# Design B: no `labeled` here, so labels never start a CI run.
-# The PR title decides the result, standing in for a Dependabot-started run
-# whose reviews fail: a title containing FAIL fails `gate / check`.
+# Design D: no `labeled`. For a "Dependabot" PR (title contains DEPBOT,
+# standing in for github.actor == dependabot[bot]) the review job skips at
+# the CALLER level, so CI reports no `gate / check` at all (not a pass, not
+# a failure); the re-run workflow must supply it.
 on:
   pull_request:
     types: [opened, synchronize, reopened]
@@ -9,6 +10,7 @@ permissions:
   contents: read
 jobs:
   gate:
+    if: ${{ !contains(github.event.pull_request.title, 'DEPBOT') }}
     uses: ./.github/workflows/inner.yml
     with:
-      pass: ${{ !contains(github.event.pull_request.title, 'FAIL') }}
+      pass: true
