@@ -1,0 +1,21 @@
+name: inner
+# Stand-in for the reusable review workflows: one job `check`, so a caller
+# job `gate` reports the context `gate / check`.
+on:
+  workflow_call:
+    inputs:
+      pass:
+        type: boolean
+        required: true
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pass or fail on purpose
+        env:
+          PASS: ${{ inputs.pass }}
+        run: |
+          echo "pass=$PASS"
+          test "$PASS" = "true"

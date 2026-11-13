@@ -1,0 +1,14 @@
+name: CI
+# Design B: no `labeled` here, so labels never start a CI run.
+# The PR title decides the result, standing in for a Dependabot-started run
+# whose reviews fail: a title containing FAIL fails `gate / check`.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+permissions:
+  contents: read
+jobs:
+  gate:
+    uses: ./.github/workflows/inner.yml
+    with:
+      pass: ${{ !contains(github.event.pull_request.title, 'FAIL') }}
